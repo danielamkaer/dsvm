@@ -1,0 +1,14 @@
+nop
+jump 0x12
+.db Hello World
+loadi 0x6
+dup
+ldi.1
+dup
+cmp
+jumpz 0x29
+hvcall 0x10
+pop
+inc
+jump 0x17
+halt
