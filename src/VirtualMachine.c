@@ -19,7 +19,6 @@ vm_opcode_entry vmOpcodes[] = {
 	{ OPCODE_POP, "pop" },
 	{ OPCODE_CMP, "cmp" },
 	{ OPCODE_INC, "inc" },
-	{ OPCODE_HVCALL, "hvcall" },
 	{ OPCODE_JUMPZ, "jumpz" },
 	{ OPCODE_JUMPNZ, "jumpnz" },
 	{ OPCODE_STORE, "store" },
@@ -231,20 +230,6 @@ vm_status Vm_Run(vm_instance *instance)
 				vm_word_t promotedValue = value;
 
 				Stack_Push(instance, &promotedValue);
-			}
-			break;
-		case OPCODE_HVCALL:
-			{
-				uint8_t hvCall;
-
-				MemRead(instance, &hvCall, instance->programCounter + 1, sizeof(hvCall));
-
-				vm_word_t word;
-
-				Stack_Pop(instance, &word);
-				Stack_Push(instance, &word);
-
-				printf("%c\r\n", word & 0xff);
 			}
 			break;
 		case OPCODE_JUMP:

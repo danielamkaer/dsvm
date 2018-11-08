@@ -47,9 +47,6 @@ typedef enum {
 #define OPCODE_LDI1  (0x08)
 #define OPCODE_RET   (0x3E)
 #define OPCODE_HALT  (0x3F)
-
-#define OPCODE_HVCALL (0x40)
-
 #define OPCODE_LOAD  (0x80)
 #define OPCODE_LOADI (0x81)
 #define OPCODE_JUMP  (0x82)

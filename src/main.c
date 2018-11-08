@@ -135,11 +135,34 @@ int main(void)
 	memset(program, 0, sizeof(program));
 	size_t assembledLength;
 
-	int status = Assemble(program, sizeof(program), &assembledLength);
-	if (status) {
-		printf("status = %i\r\n", status);
-		return status;
+	(void)Assemble;
+
+//	int status = Assemble(program, sizeof(program), &assembledLength);
+//	if (status) {
+//		printf("status = %i\r\n", status);
+//		return status;
+//	}
+
+	FILE *fp = fopen("program.bin","rb");
+	if (fp == NULL)
+	{
+		return 1;
 	}
+
+	fseek(fp, 0, SEEK_END);
+	long int length = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	long int read = 0;
+	while (read < length)
+	{
+		read += fread(program, 1, (length - read), fp);
+	}
+
+	fclose(fp);
+
+	assembledLength = read;
+
 
 	for (size_t i = 0; i < assembledLength; i++)
 	{

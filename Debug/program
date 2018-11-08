@@ -1,13 +1,14 @@
 nop
-jump 0x12
-.db Hello World
-loadi 0x6
-dup
+jump start
+mytext: .db HELLO World
+start: loadi mytext
+loop: dup
 ldi.1
 dup
+nop
 cmp
-jumpz 0x2b
+jumpz finish
 store 0x1000
 inc
-jump 0x17
-halt
+jump loop
+finish: halt
