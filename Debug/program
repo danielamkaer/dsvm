@@ -6,9 +6,8 @@ dup
 ldi.1
 dup
 cmp
-jumpz 0x29
-hvcall 0x10
-pop
+jumpz 0x2b
+store 0x1000
 inc
 jump 0x17
 halt

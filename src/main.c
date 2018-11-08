@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-#include "vm.h"
+
+#include "VirtualMachine.h"
+#include "MemoryBus.h"
 
 static vm_instance vmInstance;
 
@@ -105,9 +107,32 @@ static vm_word_t VmPutChar(vm_word_t word)
 	return 0;
 }
 
+static vm_status DebugRead(void *argument, vm_word_t address, vm_word_t *value)
+{
+	(void) argument;
+	(void) address;
+	(void) value;
+
+	return VM_STATUS_MEMORY_BUS_FAULT;
+}
+
+static vm_status DebugWrite(void *argument, vm_word_t address, vm_word_t value)
+{
+	(void) argument;
+
+	if (address == 0)
+	{
+		printf("%c", value & 0xff);
+		return VM_STATUS_OK;
+	}
+
+	return VM_STATUS_MEMORY_BUS_FAULT;
+}
+
 int main(void)
 {
 	uint8_t program[1<<16];
+	memset(program, 0, sizeof(program));
 	size_t assembledLength;
 
 	int status = Assemble(program, sizeof(program), &assembledLength);
@@ -142,10 +167,23 @@ int main(void)
 		printf("\r\n");
 	}
 
+	memory_bus memoryBus;
+	MemoryBus_Initialize(&memoryBus, 0x400);
+
+	memory_page_registration ramPage;
+	uint8_t ramBuffer[4 * 0x400];
+	memset(ramBuffer, 0, sizeof(ramBuffer));
+	MemoryBus_AddPageRegistration(&memoryBus, &ramPage, 0, 4, Buffer_ReadFunction, Buffer_WriteFunction, ramBuffer);
+
+	memory_page_registration debugPage;
+	MemoryBus_AddPageRegistration(&memoryBus, &debugPage, 4, 1, DebugRead, DebugWrite, NULL);
+
 	Vm_Initialize(&vmInstance);
 	Vm_SetHypervisorCall(&vmInstance, 0x10, VmPutChar);
+	Vm_SetMemoryHandling(&vmInstance, MemoryBus_ReadFunction, MemoryBus_WriteFunction, &memoryBus);
+	Vm_SetStackPointer(&vmInstance, sizeof(ramBuffer));
 
-	Vm_Load(&vmInstance, 0, program, assembledLength);
+	Vm_Load(&vmInstance, 0, (vm_word_t *) program, (assembledLength + sizeof(vm_word_t) - 1) / sizeof(vm_word_t));
 
 	Vm_Run(&vmInstance);
 }
